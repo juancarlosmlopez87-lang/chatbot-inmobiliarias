@@ -93,7 +93,7 @@ export async function POST(request: Request) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages.slice(-10),
@@ -105,10 +105,11 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Groq error:', error);
+      console.error('Groq error:', response.status, error);
       return NextResponse.json({
         message: getDemoResponse(messages),
         demo: true,
+        groqError: `${response.status}: ${error.substring(0, 200)}`,
       });
     }
 
@@ -116,6 +117,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: data.choices[0].message.content,
       demo: false,
+      model: data.model,
     });
   } catch {
     return NextResponse.json(
